@@ -1,17 +1,27 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import SignInForm from "@/components/auth/sign-in-form";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function SignInForm() {
+  const [email, setEmail] = useState("");
+  const router = useRouter();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md shadow-xl rounded-2xl">
-        <CardContent className="p-6">
-          <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
-          <SignInForm />
-        </CardContent>
-      </Card>
-    </div>
+    <form onSubmit={(e) => e.preventDefault()}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="border p-2 rounded w-full mb-4"
+        placeholder="Enter email"
+      />
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded"
+      >
+        Sign In
+      </button>
+    </form>
   );
 }
