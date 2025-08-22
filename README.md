@@ -173,6 +173,7 @@ This project is for academic purposes under the DCIT 208 Software Engineering co
 
 **Team:** Group 53 – Tech People
 **Email:** [sedegahkim@gmail.com](mailto:sedegahkim@gmail.com)
+
 **GitHub:** [https://github.com/sedegah/GAS-Frontend](https://github.com/sedegah/GAS-Frontend)
 
 ---
