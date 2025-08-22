@@ -15,7 +15,7 @@ interface SignInFormProps {
   onForgotPassword?: () => void;
 }
 
-export function SignInForm({ onLoginSuccess, onForgotPassword }: SignInFormProps) {
+export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInFormProps) {
   const router = useRouter();
   const { toast } = useToast() || { toast: undefined };
 
