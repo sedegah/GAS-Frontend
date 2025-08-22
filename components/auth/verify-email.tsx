@@ -41,7 +41,7 @@ export default function VerifyEmail() {
           return
         }
 
-        if (data.session) {
+        if (data?.session) {
           router.push("/dashboard")
         } else {
           setError("Unexpected error during email verification.")
