@@ -1,7 +1,8 @@
 # Ghana Audit Service – Correspondence Management System (Frontend)
 
 **Project:** DCIT 208 – Software Engineering
-**Team:** Group 53 – Tech People
+
+
 **Course Year:** 2025
 
 ---
