@@ -17,7 +17,7 @@ interface SignInFormProps {
 
 export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInFormProps) {
   const router = useRouter();
-  const { toast } = useToast() || { toast: undefined };
+  const { toast } = useToast(); // ✅ no fallback hack
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,9 +27,7 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
 
   // ✅ Listen to auth state changes
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         const userFullName = session.user.user_metadata?.full_name || "";
         localStorage.setItem("auth", "true");
@@ -46,20 +44,23 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      data.subscription?.unsubscribe(); // ✅ safe cleanup
+    };
   }, [router, rememberMe, onLoginSuccess]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
     if (!trimmedEmail || !trimmedPassword) {
-      toast?.({
+      toast({
         title: "Login Failed",
         description: "Email and password cannot be empty.",
         variant: "destructive",
-      }) || alert("Email and password cannot be empty.");
+      });
       return;
     }
 
@@ -72,18 +73,22 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
       });
 
       if (error) {
-        toast?.({
+        toast({
           title: "Login Failed",
           description: error.message,
           variant: "destructive",
-        }) || alert(error.message);
+        });
         return;
       }
 
-      // ✅ No need to redirect here — onAuthStateChange will handle it
+      // ✅ onAuthStateChange will handle redirect
     } catch (err) {
       console.error(err);
-      alert("Unexpected error during sign in");
+      toast({
+        title: "Unexpected Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -93,8 +98,8 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
     <form onSubmit={handleLogin} className="space-y-6">
       {/* Email Input */}
       <div className="space-y-3">
-        <Label htmlFor="email" className="text-white font-medium flex items-center gap-2">
-          <Mail className="w-4 h-4 text-[#8e8e93]" />
+        <Label htmlFor="email" className="font-medium flex items-center gap-2">
+          <Mail className="w-4 h-4 text-gray-500" />
           Email
         </Label>
         <Input
@@ -109,8 +114,8 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
 
       {/* Password Input */}
       <div className="space-y-3">
-        <Label htmlFor="password" className="text-white font-medium flex items-center gap-2">
-          <Lock className="w-4 h-4 text-[#8e8e93]" />
+        <Label htmlFor="password" className="font-medium flex items-center gap-2">
+          <Lock className="w-4 h-4 text-gray-500" />
           Password
         </Label>
         <div className="relative">
@@ -140,7 +145,7 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
           <Checkbox
             id="remember"
             checked={rememberMe}
-            onCheckedChange={setRememberMe}
+            onCheckedChange={(val) => setRememberMe(Boolean(val))}
           />
           <Label htmlFor="remember">Remember me</Label>
         </div>
@@ -152,7 +157,7 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" disabled={isLoading}>
+      <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading ? "Signing in..." : "Sign In"}
       </Button>
     </form>
