@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import SignInForm from "@/components/auth/sign-in-form";
 
