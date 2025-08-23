@@ -4,9 +4,11 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* PWA Manifest */}
+        {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
+        {/* Favicon */}
         <link rel="icon" href="/gas-logo.png" />
+        {/* Theme color */}
         <meta name="theme-color" content="#005826" />
         {/* Mobile / Apple fallback */}
         <meta name="mobile-web-app-capable" content="yes" />
