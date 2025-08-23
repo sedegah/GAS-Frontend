@@ -4,12 +4,15 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Link to your manifest */}
+        {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
-        {/* Favicon */}
         <link rel="icon" href="/gas-logo.png" />
-        {/* Theme color for mobile browsers */}
         <meta name="theme-color" content="#005826" />
+        {/* Mobile / Apple fallback */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="GAS CMS" />
+        <link rel="apple-touch-icon" href="/gas-logo.png" />
       </Head>
       <body>
         <Main />
