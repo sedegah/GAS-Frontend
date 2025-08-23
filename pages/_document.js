@@ -4,7 +4,7 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Link to manifest */}
+        {/* Link to your manifest */}
         <link rel="manifest" href="/manifest.json" />
         {/* Favicon */}
         <link rel="icon" href="/gas-logo.png" />
