@@ -15,7 +15,7 @@ function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/gas-logo.png" />
+        <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#005826" />
       </Head>
       <Component {...pageProps} />
