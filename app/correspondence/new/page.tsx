@@ -9,7 +9,6 @@ import { Calendar, User, FileText, Upload, Save, ArrowLeft } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function NewCorrespondencePage() {
@@ -257,12 +256,12 @@ export default function NewCorrespondencePage() {
               {/* Message Content */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Message Content</label>
-                <Textarea
+                <textarea
                   placeholder="Enter message content..."
                   value={formData.message_content}
                   onChange={(e) => setFormData({ ...formData, message_content: e.target.value })}
                   rows={6}
-                  className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557] resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1D3557] focus:border-[#1D3557] resize-none"
                 />
               </div>
 
