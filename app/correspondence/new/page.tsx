@@ -5,6 +5,12 @@ import { Header } from "@/components/dashboard/header"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/hooks/useAuth"
+import { Calendar, User, FileText, Upload, Save, ArrowLeft } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function NewCorrespondencePage() {
   const { session, loading: authLoading } = useAuth()
@@ -105,110 +111,192 @@ export default function NewCorrespondencePage() {
   }
 
   if (authLoading) {
-    return <div className="p-8 text-center text-gray-500">Loading...</div>
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#1D3557] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      <Header title="Correspondence System" />
+      <Header title="Correspondence Management" />
 
-      <main className="ml-48 p-8">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">New Correspondence</h2>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date:</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sender:</label>
-              <input
-                type="text"
-                placeholder="Enter name"
-                value={formData.sender}
-                onChange={(e) => setFormData({ ...formData, sender: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Recipient:</label>
-              <input
-                type="text"
-                placeholder="Enter name"
-                value={formData.recipient}
-                onChange={(e) => setFormData({ ...formData, recipient: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Subject:</label>
-              <input
-                type="text"
-                placeholder="Subject"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="Pending">Pending</option>
-                <option value="Completed">Completed</option>
-                <option value="Archived">Archived</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Attachment (PDF/Image, Max 5MB):</label>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <textarea
-                placeholder="Message content..."
-                value={formData.message_content}
-                onChange={(e) => setFormData({ ...formData, message_content: e.target.value })}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+      <main className="ml-64 p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => router.back()}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              {loading ? "Saving..." : "Save Correspondence"}
-            </button>
-          </form>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">New Correspondence</h1>
+          <p className="text-gray-600">Create a new correspondence record</p>
         </div>
+
+        <Card className="bg-white border border-gray-200 shadow-sm max-w-4xl">
+          <CardHeader className="pb-4 border-b border-gray-200">
+            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+              <FileText className="w-5 h-5 text-[#1D3557]" />
+              Correspondence Details
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Date */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Date
+                  </label>
+                  <Input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]"
+                    required
+                  />
+                </div>
+
+                {/* Status */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                    <SelectTrigger className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Sender */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Sender
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter sender name"
+                    value={formData.sender}
+                    onChange={(e) => setFormData({ ...formData, sender: e.target.value })}
+                    className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]"
+                    required
+                  />
+                </div>
+
+                {/* Recipient */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Recipient
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter recipient name"
+                    value={formData.recipient}
+                    onChange={(e) => setFormData({ ...formData, recipient: e.target.value })}
+                    className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Subject</label>
+                <Input
+                  type="text"
+                  placeholder="Enter correspondence subject"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]"
+                  required
+                />
+              </div>
+
+              {/* File Upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  Attachment
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="border-0 focus:ring-0"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">PDF, DOC, JPG, PNG (Max 5MB)</p>
+                  {file && (
+                    <p className="text-sm text-green-600 mt-2 font-medium">
+                      Selected: {file.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Message Content */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Message Content</label>
+                <Textarea
+                  placeholder="Enter message content..."
+                  value={formData.message_content}
+                  onChange={(e) => setFormData({ ...formData, message_content: e.target.value })}
+                  rows={6}
+                  className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557] resize-none"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-4 border-t border-gray-200">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-[#1D3557] hover:bg-[#1D3557]/90 text-white"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </div>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Correspondence
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </main>
     </div>
   )
