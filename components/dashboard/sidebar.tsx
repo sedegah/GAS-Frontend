@@ -42,9 +42,7 @@ export function Sidebar() {
       {/* Company Header */}
       <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-[#1D3557] to-[#2D4A7F]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-            <Building className="w-6 h-6 text-white" />
-          </div>
+          {/* Removed the logo/icon container */}
           <div>
             <h2 className="text-lg font-semibold text-white">Ghana Audit Service</h2>
             <p className="text-white/80 text-sm">Correspondence System</p>
