@@ -21,13 +21,23 @@ export default function AuthPage() {
   // Check for existing session on mount
   useEffect(() => {
     const checkSession = async () => {
-      setIsLoading(true)
-      const { data } = await supabase.auth.getSession()
-      if (data?.session) {
-        router.push("/dashboard")
+      try {
+        setIsLoading(true)
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error("Session check error:", error)
+          // Continue to login page even if there's an error
+        } else if (session) {
+          router.push("/dashboard")
+          return
+        }
+      } catch (error) {
+        console.error("Unexpected error during session check:", error)
+      } finally {
+        setSessionChecked(true)
+        setIsLoading(false)
       }
-      setSessionChecked(true)
-      setIsLoading(false)
     }
     checkSession()
   }, [router])
@@ -36,43 +46,69 @@ export default function AuthPage() {
     e.preventDefault()
 
     if (!validateEmail(email)) {
-      toast({ title: "Invalid email", description: "Enter a valid GAS email.", variant: "destructive" })
+      toast({ 
+        title: "Invalid email", 
+        description: "Please enter a valid email address.", 
+        variant: "destructive" 
+      })
       return
     }
     if (!password || password.length < 6) {
-      toast({ title: "Invalid password", description: "Password must be at least 6 characters.", variant: "destructive" })
+      toast({ 
+        title: "Invalid password", 
+        description: "Password must be at least 6 characters.", 
+        variant: "destructive" 
+      })
       return
     }
 
     setIsLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim(), 
+        password 
+      })
 
       if (error) {
-        toast({ title: "Login failed", description: error.message, variant: "destructive" })
+        toast({ 
+          title: "Login failed", 
+          description: error.message, 
+          variant: "destructive" 
+        })
         return
       }
 
       if (!data.session) {
         toast({
-          title: "Email not confirmed",
-          description: "Please confirm your email before signing in.",
+          title: "Authentication required",
+          description: "Please check your email for verification.",
           variant: "destructive",
         })
         return
       }
 
-      // Save session locally
+      // Simple session storage without sensitive data
       localStorage.setItem("auth", "true")
       localStorage.setItem("userEmail", email)
-      if (rememberMe) localStorage.setItem("supabaseToken", data.session.access_token || "")
 
-      toast({ title: "Welcome!", description: "Successfully signed in." })
-      router.push("/dashboard")
-    } catch (err) {
-      console.error(err)
-      toast({ title: "Unexpected error", description: "Failed to sign in. Try again later.", variant: "destructive" })
+      toast({ 
+        title: "Welcome!", 
+        description: "Successfully signed in." 
+      })
+      
+      // Add a small delay to ensure session is properly set
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 500)
+      
+    } catch (err: any) {
+      console.error("Sign in error:", err)
+      toast({ 
+        title: "Unexpected error", 
+        description: err?.message || "Failed to sign in. Please try again.", 
+        variant: "destructive" 
+      })
     } finally {
       setIsLoading(false)
     }
@@ -82,11 +118,19 @@ export default function AuthPage() {
     e.preventDefault()
 
     if (!validateEmail(email)) {
-      toast({ title: "Invalid email", description: "Enter a valid GAS email.", variant: "destructive" })
+      toast({ 
+        title: "Invalid email", 
+        description: "Please enter a valid email address.", 
+        variant: "destructive" 
+      })
       return
     }
     if (password.length < 6) {
-      toast({ title: "Password too short", description: "Password must be at least 6 characters.", variant: "destructive" })
+      toast({ 
+        title: "Password too short", 
+        description: "Password must be at least 6 characters.", 
+        variant: "destructive" 
+      })
       return
     }
 
@@ -94,52 +138,100 @@ export default function AuthPage() {
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
-        options: { data: { full_name: "" } }, // add full name if needed
+        options: { 
+          data: { full_name: "" },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        },
       })
 
       if (error) {
-        toast({ title: "Sign-up failed", description: error.message, variant: "destructive" })
+        toast({ 
+          title: "Sign-up failed", 
+          description: error.message, 
+          variant: "destructive" 
+        })
         return
       }
 
-      toast({
-        title: "Account created!",
-        description: "Check your email and confirm it before signing in.",
+      if (data.user && !data.session) {
+        toast({
+          title: "Account created!",
+          description: "Please check your email to confirm your account.",
+        })
+        // Clear form after successful signup
+        setEmail("")
+        setPassword("")
+      } else if (data.session) {
+        // Auto-logged in (if email confirmation is disabled)
+        toast({ 
+          title: "Welcome!", 
+          description: "Successfully signed in." 
+        })
+        router.push("/dashboard")
+      }
+    } catch (err: any) {
+      console.error("Sign up error:", err)
+      toast({ 
+        title: "Unexpected error", 
+        description: err?.message || "Failed to create account. Please try again.", 
+        variant: "destructive" 
       })
-    } catch (err) {
-      console.error(err)
-      toast({ title: "Unexpected error", description: "Failed to sign up. Try again later.", variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleForgotPassword = async () => {
-    if (!email) {
-      toast({ title: "Enter email", description: "Provide your email to reset password.", variant: "destructive" })
+    if (!email || !validateEmail(email)) {
+      toast({ 
+        title: "Enter email", 
+        description: "Please provide a valid email address.", 
+        variant: "destructive" 
+      })
       return
     }
 
+    setIsLoading(true)
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email)
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      
       if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" })
+        toast({ 
+          title: "Error", 
+          description: error.message, 
+          variant: "destructive" 
+        })
       } else {
-        toast({ title: "Password reset", description: "Check your email for instructions." })
+        toast({ 
+          title: "Password reset sent", 
+          description: "Check your email for reset instructions." 
+        })
       }
-    } catch (err) {
-      console.error(err)
-      toast({ title: "Unexpected error", description: "Failed to request password reset.", variant: "destructive" })
+    } catch (err: any) {
+      console.error("Password reset error:", err)
+      toast({ 
+        title: "Unexpected error", 
+        description: err?.message || "Failed to send reset email.", 
+        variant: "destructive" 
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   // Wait until session check completes before rendering
-  if (!sessionChecked || isLoading) {
+  if (!sessionChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1D3557] mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
       </div>
     )
   }
@@ -147,7 +239,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-blue-100">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-[#005826]/5"></div>
-      <div className="relative z-10">
+      <div className="relative z-10 w-full max-w-md">
         <AuthCard
           isLoading={isLoading}
           email={email}
@@ -158,7 +250,12 @@ export default function AuthPage() {
           setRememberMe={setRememberMe}
           onSignIn={handleSignIn}
           onSignUp={handleSignUp}
-          onSocialLogin={(provider) => console.log(`${provider} login not implemented`)}
+          onSocialLogin={(provider) => {
+            toast({
+              title: "Feature not available",
+              description: `${provider} login is not implemented yet.`,
+            })
+          }}
           onForgotPassword={handleForgotPassword}
         />
       </div>
