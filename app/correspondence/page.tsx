@@ -4,7 +4,7 @@ import { Header } from "@/components/dashboard/header"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { supabase, type Correspondence } from "@/lib/supabase"
 import { useAuth } from "@/hooks/useAuth"
-import { Search, Filter, Download, Eye, FileText, Calendar, User, ArrowUpDown, Plus } from "lucide-react"
+import { Search, Filter, Download, Eye, FileText, Calendar, User, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,19 +27,16 @@ export default function CorrespondencePage() {
   const fetchCorrespondences = async () => {
     let query = supabase.from("correspondence").select("*")
 
-    // Apply search filter
     if (searchQuery) {
       query = query.or(
         `subject.ilike.%${searchQuery}%,sender.ilike.%${searchQuery}%,recipient.ilike.%${searchQuery}%,registry_number.ilike.%${searchQuery}%`
       )
     }
 
-    // Apply status filter
     if (statusFilter !== "all") {
       query = query.eq("status", statusFilter)
     }
 
-    // Apply sorting
     if (sortBy === "newest") {
       query = query.order("created_at", { ascending: false })
     } else if (sortBy === "oldest") {
@@ -74,71 +71,64 @@ export default function CorrespondencePage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-emerald-50 text-emerald-700 border border-emerald-200"
       case "Pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-amber-50 text-amber-700 border border-amber-200"
       case "Archived":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-slate-100 text-slate-700 border border-slate-300"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-50 text-gray-700 border border-gray-200"
     }
   }
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1D3557] mx-auto mb-4"></div>
-          <p className="text-[#457B9D]">Loading correspondence...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#1D3557] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9]">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <Header title="Correspondence Management" />
 
-      <main className="ml-48 p-8">
-        {/* Header Section */}
+      <main className="ml-64 p-8">
+        {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#1D3557] mb-3">Correspondence Records</h1>
-          <p className="text-lg text-[#457B9D]">Search and manage all correspondence in the system</p>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Correspondence Records</h1>
+          <p className="text-gray-600">Search and manage organizational correspondence</p>
         </div>
 
-        {/* Search Card */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm mb-8">
-          <CardHeader className="pb-4 border-b border-[#1D3557]/10">
-            <CardTitle className="text-2xl font-bold text-[#1D3557] flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-[#1D3557] to-[#005826] rounded-lg">
-                <Search className="w-6 h-6 text-white" />
-              </div>
-              Search & Filter
-            </CardTitle>
+        {/* Search and Filters Card */}
+        <Card className="bg-white border border-gray-200 shadow-sm mb-6">
+          <CardHeader className="pb-4 border-b border-gray-200">
+            <CardTitle className="text-lg font-semibold text-gray-900">Search & Filters</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
               {/* Search Input */}
               <div className="lg:col-span-2">
-                <label className="text-sm font-semibold text-[#1D3557] mb-2 block">Search Correspondence</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#457B9D]" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    placeholder="Search by subject, sender, recipient, or registry number..."
+                    placeholder="Search correspondence..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    className="pl-12 h-12 border-2 border-[#1D3557]/15 focus:border-[#005826] focus:ring-2 focus:ring-[#005826]/20 text-lg rounded-xl"
+                    className="pl-10 border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]"
                   />
                 </div>
               </div>
 
               {/* Status Filter */}
               <div>
-                <label className="text-sm font-semibold text-[#1D3557] mb-2 block">Status Filter</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-12 border-2 border-[#1D3557]/15 focus:border-[#005826] focus:ring-2 focus:ring-[#005826]/20 rounded-xl">
+                  <SelectTrigger className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]">
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -152,10 +142,9 @@ export default function CorrespondencePage() {
 
               {/* Sort By */}
               <div>
-                <label className="text-sm font-semibold text-[#1D3557] mb-2 block">Sort By</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-12 border-2 border-[#1D3557]/15 focus:border-[#005826] focus:ring-2 focus:ring-[#005826]/20 rounded-xl">
-                    <SelectValue placeholder="Newest First" />
+                  <SelectTrigger className="border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557]">
+                    <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="newest">Newest First</SelectItem>
@@ -164,137 +153,120 @@ export default function CorrespondencePage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Results Count */}
+              <div className="flex items-center justify-between lg:justify-end">
+                <span className="text-sm text-gray-500 lg:text-right">
+                  {correspondences.length} records
+                </span>
+              </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-              <div className="text-sm text-[#457B9D] bg-[#F1F5F9] px-4 py-2 rounded-lg border border-[#1D3557]/10">
-                Found {correspondences.length} correspondence records
-              </div>
+            <div className="flex gap-3 justify-between items-center">
+              <Button
+                onClick={handleReset}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Reset
+              </Button>
               <div className="flex gap-3">
                 <Button
-                  onClick={handleReset}
-                  variant="outline"
-                  className="h-12 border-2 border-[#1D3557]/20 text-[#457B9D] hover:bg-[#1D3557]/5 hover:text-[#1D3557] rounded-xl px-6"
-                >
-                  Reset Filters
-                </Button>
-                <Button
                   onClick={handleSearch}
-                  className="h-12 bg-gradient-to-r from-[#005826] to-[#1D3557] hover:from-[#005826]/90 hover:to-[#1D3557]/90 text-white rounded-xl px-8 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-[#1D3557] hover:bg-[#1D3557]/90 text-white"
                 >
-                  <Search className="w-5 h-5 mr-2" />
-                  Search Records
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Results Card */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-[#1D3557]/10">
-            <CardTitle className="text-2xl font-bold text-[#1D3557] flex items-center gap-3">
-              <div className="p-2 bg-[#1D3557] rounded-lg">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              Correspondence Results
-            </CardTitle>
+        {/* Results Table */}
+        <Card className="bg-white border border-gray-200 shadow-sm">
+          <CardHeader className="pb-4 border-b border-gray-200">
+            <CardTitle className="text-lg font-semibold text-gray-900">Correspondence</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
-              <div className="p-16 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1D3557] mx-auto mb-4"></div>
-                <p className="text-[#457B9D] text-lg">Loading correspondence records...</p>
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#1D3557] border-t-transparent mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading records...</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-[#1D3557]/5 to-[#005826]/5">
+                  <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-8 py-6 text-left text-sm font-bold text-[#1D3557] uppercase tracking-wider">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          Registry Details
-                        </div>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Subject & ID
                       </th>
-                      <th className="px-8 py-6 text-left text-sm font-bold text-[#1D3557] uppercase tracking-wider">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Date
-                        </div>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Date
                       </th>
-                      <th className="px-8 py-6 text-left text-sm font-bold text-[#1D3557] uppercase tracking-wider">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          Parties
-                        </div>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Sender/Recipient
                       </th>
-                      <th className="px-8 py-6 text-left text-sm font-bold text-[#1D3557] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-8 py-6 text-left text-sm font-bold text-[#1D3557] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1D3557]/10">
+                  <tbody className="divide-y divide-gray-200">
                     {correspondences.map((item) => (
-                      <tr key={item.id} className="hover:bg-[#1D3557]/3 transition-colors duration-200 group">
-                        <td className="px-8 py-6">
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
                           <div>
-                            <p className="font-semibold text-[#1D3557] text-lg leading-tight group-hover:text-[#005826] transition-colors">
-                              {item.subject}
-                            </p>
-                            <p className="text-sm text-[#457B9D] font-mono mt-1">
-                              #{item.registry_number || "N/A"}
-                            </p>
+                            <p className="font-medium text-gray-900 text-sm mb-1">{item.subject}</p>
+                            <p className="text-xs text-gray-500 font-mono">#{item.registry_number || "N/A"}</p>
                           </div>
                         </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-[#457B9D]" />
-                            <span className="text-sm font-medium text-[#1D3557]">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-900">
                               {new Date(item.date).toLocaleDateString()}
                             </span>
                           </div>
                         </td>
-                        <td className="px-8 py-6">
-                          <div className="space-y-2">
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-green-600" />
-                              <span className="text-sm text-[#1D3557]">
-                                <span className="font-medium">From:</span> {item.sender}
-                              </span>
+                              <User className="w-3 h-3 text-gray-400" />
+                              <span className="text-sm text-gray-600">From: {item.sender}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm text-[#1D3557]">
-                                <span className="font-medium">To:</span> {item.recipient}
-                              </span>
+                              <User className="w-3 h-3 text-gray-400" />
+                              <span className="text-sm text-gray-600">To: {item.recipient}</span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2 ${getStatusColor(item.status)}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                             {item.status}
                           </span>
                         </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <Button 
                               size="sm"
-                              className="h-10 bg-[#1D3557] hover:bg-[#1D3557]/90 text-white rounded-lg px-4 shadow-lg transition-all"
+                              variant="outline"
+                              className="h-8 border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
-                              <Eye className="w-4 h-4 mr-2" />
+                              <Eye className="w-3 h-3 mr-1" />
                               View
                             </Button>
                             <Button 
                               size="sm"
                               variant="outline"
-                              className="h-10 border-2 border-[#1D3557]/20 text-[#1D3557] hover:bg-[#1D3557] hover:text-white rounded-lg px-4 transition-all"
+                              className="h-8 border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
-                              <Download className="w-4 h-4 mr-2" />
+                              <Download className="w-3 h-3 mr-1" />
                               Export
                             </Button>
                           </div>
@@ -305,13 +277,13 @@ export default function CorrespondencePage() {
                 </table>
                 
                 {correspondences.length === 0 && (
-                  <div className="text-center py-20">
-                    <FileText className="w-24 h-24 text-[#457B9D] opacity-30 mx-auto mb-6" />
-                    <p className="text-2xl font-bold text-[#457B9D] mb-2">No correspondence found</p>
-                    <p className="text-[#457B9D]">
+                  <div className="text-center py-16">
+                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 font-medium mb-1">No correspondence found</p>
+                    <p className="text-sm text-gray-400">
                       {searchQuery || statusFilter !== "all" 
-                        ? "Try adjusting your search criteria or filters" 
-                        : "No correspondence records available"
+                        ? "Try adjusting your search criteria" 
+                        : "No records available"
                       }
                     </p>
                   </div>
