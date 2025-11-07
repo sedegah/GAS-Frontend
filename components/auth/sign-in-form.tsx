@@ -17,7 +17,7 @@ interface SignInFormProps {
 
 export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInFormProps) {
   const router = useRouter();
-  const { toast } = useToast(); // ✅ no fallback hack
+  const { toast } = useToast();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,29 +25,17 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Listen to auth state changes
+  // Check for existing session on component mount
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const userFullName = session.user.user_metadata?.full_name || "";
-        localStorage.setItem("auth", "true");
-        localStorage.setItem("userFullName", userFullName);
-        if (rememberMe && session.access_token) {
-          localStorage.setItem("supabaseToken", session.access_token);
-        }
-        onLoginSuccess?.();
         router.push("/dashboard");
-      } else {
-        localStorage.removeItem("auth");
-        localStorage.removeItem("userFullName");
-        localStorage.removeItem("supabaseToken");
       }
-    });
-
-    return () => {
-      data.subscription?.unsubscribe(); // ✅ safe cleanup
     };
-  }, [router, rememberMe, onLoginSuccess]);
+    
+    checkExistingSession();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +55,7 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
       });
@@ -81,9 +69,27 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
         return;
       }
 
-      // ✅ onAuthStateChange will handle redirect
+      if (data.session) {
+        // Store session data
+        localStorage.setItem("auth", "true");
+        localStorage.setItem("userFullName", data.user.user_metadata?.full_name || "");
+        if (rememberMe) {
+          localStorage.setItem("supabaseToken", data.session.access_token);
+        }
+
+        // Show success message
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+
+        // Call success callback and redirect
+        onLoginSuccess?.();
+        router.push("/dashboard");
+        router.refresh(); // Refresh to update any server components
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
       toast({
         title: "Unexpected Error",
         description: "Something went wrong. Please try again.",
@@ -109,6 +115,7 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -126,15 +133,17 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={isLoading}
           />
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="absolute right-0 top-0 h-full px-4"
+            className="absolute right-0 top-0 h-full px-4 hover:bg-transparent"
             onClick={() => setShowPassword(!showPassword)}
+            disabled={isLoading}
           >
-            {showPassword ? <EyeOff /> : <Eye />}
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </Button>
         </div>
       </div>
@@ -146,18 +155,30 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
             id="remember"
             checked={rememberMe}
             onCheckedChange={(val) => setRememberMe(Boolean(val))}
+            disabled={isLoading}
           />
-          <Label htmlFor="remember">Remember me</Label>
+          <Label htmlFor="remember" className="text-sm">Remember me</Label>
         </div>
         {onForgotPassword && (
-          <Button type="button" variant="link" onClick={onForgotPassword}>
+          <Button 
+            type="button" 
+            variant="link" 
+            onClick={onForgotPassword}
+            disabled={isLoading}
+            className="text-sm"
+          >
             Forgot password?
           </Button>
         )}
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" disabled={isLoading} className="w-full">
+      <Button 
+        type="submit" 
+        disabled={isLoading} 
+        className="w-full"
+        size="lg"
+      >
         {isLoading ? "Signing in..." : "Sign In"}
       </Button>
     </form>
