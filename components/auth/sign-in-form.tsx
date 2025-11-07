@@ -114,12 +114,13 @@ export default function SignInForm({ onLoginSuccess, onForgotPassword }: SignInF
 
         toast({
           title: "Login Successful",
-          description: "Welcome back!",
+          description: "Redirecting to dashboard...",
         });
 
         onLoginSuccess?.();
-        router.push("/dashboard");
-        router.refresh();
+        
+        // Use window.location.href instead of router.push for full page reload
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       console.error("Unexpected login error:", err);
