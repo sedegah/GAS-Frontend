@@ -15,6 +15,14 @@ export function Header({ title }: { title: string }) {
     getUser()
   }, [])
 
+  // Get first letter of email or fallback to "U"
+  const getUserInitial = () => {
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase()
+    }
+    return "U"
+  }
+
   return (
     <header className="bg-white border-b border-gray-200 px-8 py-6 ml-64">
       <div className="flex items-center justify-between">
@@ -27,7 +35,7 @@ export function Header({ title }: { title: string }) {
             <p className="text-sm font-medium text-gray-900">{user?.email || "Staff"}</p>
           </div>
           <div className="w-10 h-10 bg-[#1D3557] rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">U</span>
+            <span className="text-white text-sm font-medium">{getUserInitial()}</span>
           </div>
         </div>
       </div>
