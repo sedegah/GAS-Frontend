@@ -4,7 +4,7 @@ import { Header } from "@/components/dashboard/header"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { supabase, type Correspondence } from "@/lib/supabase"
 import { useAuth } from "@/hooks/useAuth"
-import { FileText, Calendar, User, Search, Filter, Download, Eye } from "lucide-react"
+import { FileText, Calendar, User, Search, Filter, Download, Eye, TrendingUp, Clock, CheckCircle, Archive } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,95 +44,106 @@ export default function DashboardPage() {
     item.registry_number?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const stats = {
+    total: correspondences.length,
+    pending: correspondences.filter(item => item.status === "Pending").length,
+    completed: correspondences.filter(item => item.status === "Completed").length,
+    archived: correspondences.filter(item => item.status === "Archived").length
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-emerald-50 text-emerald-700 border border-emerald-200"
       case "Pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-amber-50 text-amber-700 border border-amber-200"
       case "Archived":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-slate-100 text-slate-700 border border-slate-300"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-50 text-gray-700 border border-gray-200"
     }
   }
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1D3557] mx-auto mb-4"></div>
-          <p className="text-[#457B9D]">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#1D3557] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9]">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      <Header title="Correspondence System" />
+      <Header title="Correspondence Management" />
 
-      <main className="ml-48 p-6">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+      <main className="ml-64 p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Dashboard Overview</h1>
+          <p className="text-gray-600">Monitor and manage all correspondence activities</p>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#457B9D]">Total Correspondence</p>
-                  <p className="text-2xl font-bold text-[#1D3557] mt-1">{correspondences.length}</p>
+                  <p className="text-sm font-medium text-gray-600">Total</p>
+                  <p className="text-2xl font-semibold text-gray-900 mt-1">{stats.total}</p>
+                  <p className="text-xs text-gray-500 mt-1">Correspondence</p>
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-[#1D3557] to-[#005826] rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 bg-[#1D3557] rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#457B9D]">Pending</p>
-                  <p className="text-2xl font-bold text-[#1D3557] mt-1">
-                    {correspondences.filter(item => item.status === "Pending").length}
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-2xl font-semibold text-amber-600 mt-1">{stats.pending}</p>
+                  <p className="text-xs text-gray-500 mt-1">Awaiting action</p>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-yellow-600" />
+                <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-amber-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#457B9D]">Completed</p>
-                  <p className="text-2xl font-bold text-[#1D3557] mt-1">
-                    {correspondences.filter(item => item.status === "Completed").length}
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Completed</p>
+                  <p className="text-2xl font-semibold text-emerald-600 mt-1">{stats.completed}</p>
+                  <p className="text-xs text-gray-500 mt-1">Processed</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#457B9D]">Archived</p>
-                  <p className="text-2xl font-bold text-[#1D3557] mt-1">
-                    {correspondences.filter(item => item.status === "Archived").length}
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Archived</p>
+                  <p className="text-2xl font-semibold text-blue-600 mt-1">{stats.archived}</p>
+                  <p className="text-xs text-gray-500 mt-1">Stored records</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Archive className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
@@ -140,25 +151,25 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-[#1D3557]/10">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <Card className="bg-white border border-gray-200 shadow-sm">
+          <CardHeader className="pb-4 border-b border-gray-200">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div>
-                <CardTitle className="text-2xl font-bold text-[#1D3557]">Correspondence Overview</CardTitle>
-                <p className="text-[#457B9D] mt-1">Manage and track all correspondence records</p>
+                <CardTitle className="text-lg font-semibold text-gray-900">Recent Correspondence</CardTitle>
+                <p className="text-gray-600 text-sm mt-1">Latest correspondence records</p>
               </div>
               
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#457B9D]" />
+              <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     placeholder="Search correspondence..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-10 border-2 border-[#1D3557]/15 focus:border-[#005826] focus:ring-2 focus:ring-[#005826]/20 rounded-xl w-full sm:w-64"
+                    className="pl-10 border-gray-300 focus:border-[#1D3557] focus:ring-[#1D3557] w-full lg:w-64"
                   />
                 </div>
-                <Button variant="outline" className="h-10 border-2 border-[#1D3557]/15 text-[#457B9D] hover:bg-[#1D3557]/5 rounded-xl">
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -169,93 +180,82 @@ export default function DashboardPage() {
           <CardContent className="p-0">
             {loading ? (
               <div className="p-12 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1D3557] mx-auto mb-4"></div>
-                <p className="text-[#457B9D]">Loading correspondences...</p>
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#1D3557] border-t-transparent mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading correspondence...</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-[#1D3557]/5 to-[#005826]/5">
+                  <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
-                        Registry Number
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Subject & ID
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
-                        Sender
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Sender/Recipient
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
-                        Recipient
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
-                        Subject
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[#1D3557] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1D3557]/10">
+                  <tbody className="divide-y divide-gray-200">
                     {filteredCorrespondences.map((item) => (
-                      <tr key={item.id} className="hover:bg-[#1D3557]/3 transition-colors duration-200">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-[#457B9D]" />
-                            <span className="text-sm font-medium text-[#1D3557] font-mono">
-                              {item.registry_number || "N/A"}
-                            </span>
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-medium text-gray-900 text-sm mb-1">{item.subject}</p>
+                            <p className="text-xs text-gray-500 font-mono">#{item.registry_number || "N/A"}</p>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-[#457B9D]" />
-                            <span className="text-sm text-[#457B9D]">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-900">
                               {new Date(item.date).toLocaleDateString()}
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-[#457B9D]" />
-                            <span className="text-sm text-[#1D3557]">{item.sender}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-[#457B9D]" />
-                            <span className="text-sm text-[#1D3557]">{item.recipient}</span>
-                          </div>
-                        </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm text-[#1D3557] line-clamp-2 max-w-xs">{item.subject}</span>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <User className="w-3 h-3 text-gray-400" />
+                              <span className="text-sm text-gray-600">From: {item.sender}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <User className="w-3 h-3 text-gray-400" />
+                              <span className="text-sm text-gray-600">To: {item.recipient}</span>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                             {item.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <Button 
-                              size="sm" 
+                              size="sm"
                               variant="outline"
-                              className="h-8 border-[#1D3557]/20 text-[#457B9D] hover:bg-[#1D3557]/5 hover:text-[#1D3557]"
+                              className="h-8 border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
                               <Eye className="w-3 h-3 mr-1" />
                               View
                             </Button>
                             <Button 
-                              size="sm" 
+                              size="sm"
                               variant="outline"
-                              className="h-8 border-[#1D3557]/20 text-[#457B9D] hover:bg-[#1D3557]/5 hover:text-[#1D3557]"
+                              className="h-8 border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
                               <Download className="w-3 h-3 mr-1" />
-                              Download
+                              Export
                             </Button>
                           </div>
                         </td>
@@ -265,12 +265,15 @@ export default function DashboardPage() {
                 </table>
                 
                 {filteredCorrespondences.length === 0 && (
-                  <div className="text-center py-12">
-                    <FileText className="w-12 h-12 text-[#457B9D] mx-auto mb-4 opacity-50" />
-                    <p className="text-[#457B9D]">No correspondence records found</p>
-                    {searchTerm && (
-                      <p className="text-sm text-[#457B9D] mt-1">Try adjusting your search terms</p>
-                    )}
+                  <div className="text-center py-16">
+                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 font-medium mb-1">No correspondence found</p>
+                    <p className="text-sm text-gray-400">
+                      {searchTerm 
+                        ? "Try adjusting your search criteria" 
+                        : "No correspondence records available"
+                      }
+                    </p>
                   </div>
                 )}
               </div>
