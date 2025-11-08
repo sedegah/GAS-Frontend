@@ -7,6 +7,7 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 function ResetPasswordErrorContent() {
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const error = searchParams.get("error");
@@ -17,7 +18,21 @@ function ResetPasswordErrorContent() {
     } else {
       setMessage("Invalid or expired password reset link.");
     }
+    setIsLoading(false);
   }, [searchParams]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 px-4 text-center">
+        <div className="bg-white shadow-lg rounded-xl p-8 max-w-md w-full">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600">Loading error details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-center items-center h-screen bg-gray-50 px-4 text-center">
@@ -29,8 +44,8 @@ function ResetPasswordErrorContent() {
           </h1>
           <p className="text-red-600 mb-6">{message}</p>
           <a
-            href="https://gas-frontend-v2.vercel.app/"
-            className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors"
+            href="https://www.gascorrespondence.app"
+            className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Back to Login
           </a>
@@ -42,7 +57,16 @@ function ResetPasswordErrorContent() {
 
 export default function ResetPasswordErrorPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 px-4 text-center">
+        <div className="bg-white shadow-lg rounded-xl p-8 max-w-md w-full">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
       <ResetPasswordErrorContent />
     </Suspense>
   );
